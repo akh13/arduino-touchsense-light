@@ -1,44 +1,94 @@
-/*
- * Originally adapted from: https://arduinogetstarted.com/tutorials/arduino-touch-sensor
- */
-
-// constants won't change. They're used here to set pin numbers:
-const int SENSOR_PIN = 13; // the Arduino's input pin that connects to the sensor's SIGNAL pin 
-
-// Variables will change:
-int lastState = LOW;      // the previous state from the input pin
-int currentState;         // the current reading from the input pin
-int ledState = LOW;             // the current LED state
-int colorcount;
-
+#define button 13
+#define redLED 11
+#define greenLED 10
+#define blueLED 9
+int state = 0;
+int old = 0;
+int buttonPoll = 0;
+long randOn = 0;                  // Initialize a variable for the ON time
+long randOff = 0;                 // Initialize a variable for the OFF time
 void setup() {
-  // initialize serial communication at 9600 bits per second:
-  Serial.begin(9600);
-  // initialize the Arduino's pin as aninput
-  pinMode(SENSOR_PIN, INPUT);
-  // initialize digital pin LED_BUILTIN as an output.
-  pinMode(9, OUTPUT);
-  pinMode(10, OUTPUT);
-  pinMode(11, OUTPUT);
+ pinMode(button,INPUT);
+ randomSeed (analogRead (0));    // randomize
+
+ //RGB LED set as output
+ pinMode(redLED,OUTPUT);
+ pinMode(greenLED,OUTPUT);
+ pinMode(blueLED,OUTPUT);
+
+ digitalWrite(redLED,LOW);
+ digitalWrite(greenLED,LOW);
+ digitalWrite(blueLED,LOW);
 }
 
 void loop() {
-  // read the state of the the input pin:
-  currentState = digitalRead(SENSOR_PIN);
-  colorcount = 0;
-  if(lastState == LOW && currentState == HIGH){
-    // toggle LED state
-    if(ledState == LOW)
-      ledState = HIGH;
-    else if(ledState == HIGH)
-      ledState = LOW;
+ buttonPoll = digitalRead(button);
+ if(buttonPoll == 1) {
+ delay(100);
+ buttonPoll = digitalRead(button);
+ if(buttonPoll == 0) {
+ state = old + 1;
+ }
+ }
+ else {
+ delay(250);
+}
 
-    // control LED
-    digitalWrite(9, ledState);
-    digitalWrite(10, ledState);
-    digitalWrite(11, ledState);
-  }
-
-  // save the the last state
-  lastState = currentState;
+switch (state) {
+ case 1: //Red color
+ digitalWrite(redLED,HIGH);
+ digitalWrite(greenLED,LOW);
+ digitalWrite(blueLED,LOW);
+ old = state;
+ break;
+ case 2: //Green color
+ digitalWrite(redLED,LOW);
+ digitalWrite(greenLED,HIGH);
+ digitalWrite(blueLED,LOW);
+ old = state;
+ break;
+ case 3: //Blue color
+ digitalWrite(redLED,LOW);
+ digitalWrite(greenLED,LOW);
+ digitalWrite(blueLED,HIGH);
+ old = state; 
+ break;
+ case 4: //Purple color
+ digitalWrite(redLED,HIGH);
+ digitalWrite(greenLED,LOW);
+ digitalWrite(blueLED,HIGH);
+ old = state; 
+ break;
+ case 5: //White color
+ digitalWrite(redLED,HIGH);
+ digitalWrite(greenLED,HIGH);
+ digitalWrite(blueLED,HIGH);
+ old = state; 
+ break;
+ case 6: //Yellow color
+ digitalWrite(redLED,HIGH);
+ digitalWrite(greenLED,HIGH);
+ digitalWrite(blueLED,LOW);
+ old = state;
+ break;
+ case 7: //Flicker like a broken flourescent
+ randOn = random (0, 1000);    
+ randOff = random (0, 10);
+ digitalWrite(redLED,HIGH);
+ digitalWrite(greenLED,HIGH);
+ digitalWrite(blueLED,HIGH);
+   delay(randOn);                // waits for a random time while ON
+ digitalWrite(redLED,LOW);
+ digitalWrite(greenLED,LOW);
+ digitalWrite(blueLED,LOW);
+   delay(randOff);               // waits for a random time while OFF
+ old = state; 
+ break;
+  default:
+ digitalWrite(redLED,LOW);
+ digitalWrite(greenLED,LOW);
+ digitalWrite(blueLED,LOW);
+ old = 0;
+ break;
+ }
 }
